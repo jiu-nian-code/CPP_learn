@@ -4,6 +4,7 @@
 #include<vector>
 #include<queue>
 #include<unordered_map>
+#include<ctime>
 #include"my_vector.hpp"
 
 using namespace std;
@@ -129,20 +130,44 @@ using namespace std;
 	//return 0;
 //}
 
-template<class Container, class Index>
-decltype(auto) func(Container& c, Index i)
+//template<class Container, class Index>
+//decltype(auto) func(Container& c, Index i)
+//{
+//	char& a = c[i];
+//	return a;
+//}
+//
+//int add(int a, int b)
+//{
+//	return a + b;
+//}
+
+//void func(int&& a)
+//{
+//	std::cout << "void func(int&& a)" << std::endl;
+//}
+//
+//void func(const int& a)
+//{
+//	std::cout << "void func(const int& a)" << std::endl;
+//}
+
+jiunian::vector<int> func()
 {
-	char& a = c[i];
-	return a;
+	jiunian::vector<int> ret1{ 1, 2, 3 };
+	jiunian::vector<int> ret2{ 4, 5, 6 };
+	return (rand() % 2) ? ret1 : ret2; // 条件返回，通常禁用 RVO
 }
 
-int add(int a, int b)
-{
-	return a + b;
-}
+//jiunian::vector<int> func()
+//{
+//	jiunian::vector<int> ret{ 1, 2, 3 };
+//	return move(ret);
+//}
 
 int main()
 {
+	srand(time(NULL));
 	//std::vector<char> arr{'a', 'b', 'c'};
 	//int a = 1;
 	//int& b = a;
@@ -157,14 +182,48 @@ int main()
 	//decltype(auto) m = n;
 	//std::cout << typeid(i).name() << std::endl;
 
-	int a = 1; // 右值可以在右边
-	int b = a; // 左值可以在右边
+	//int a = 1; // 右值可以在右边
+	//int b = a; // 左值可以在右边
 	// 1 = a; // 右值不能在左边
 	// 1 + 1 = a;
 	// add(1, 1) = a;
-	int& ref_a = a; // 左值引用可以引用左值
-	int&& ref_c = 1; // 右值引用可以引用右值
-	int&& ref_d = add(1, 1);
-	int&& ref_e = 1 + 1;
+	//int& ref_a = a; // 左值引用可以引用左值
+	//int&& ref_c = 1; // 右值引用可以引用右值
+	//int&& ref_d = add(1, 1);
+	//int&& ref_e = 1 + 1;
+
+	//"abcd"; // 乍一看是右值
+	//const char* str = "abcd"; // 其实是左值，只是不能修改
+	//std::cout << &"abcd" << std::endl; // 可以取地址，不过这里这个表达式自动返回自己的首元素地址，再取地址就是指针的地址
+	//std::cout << &str[2] << std::endl; // 这里则是最好的证明，即使加上偏移量还是能取地址
+
+	// int& ref_a = 1; // 错误
+	//const int& ref_a = 1;
+	//int b = 1;
+	//// int&& ref_b = b; // 错误
+	//int&& ref_b = std::move(b); // move函数转化后可以
+	//std::unordered_map<int, int> mp;
+
+	//int a = 1;
+	//int& b = a;
+	//decltype(auto) c = b; // int&
+	//auto d = b; // int
+	//c++;
+	//d++;
+	//std::cout << c << std::endl; // 打印结果： 2
+
+	//func(1);
+	//int a = 1;
+	//func(a);
+	// 结果:
+	// void func(int&& a)
+	// void func(int& a)
+
+	jiunian::vector<int> arr;
+	arr = func();
+	//jiunian::vector<int> arr = func();
+	for (auto& e : arr)
+		std::cout << e << " ";
+	std::cout << std::endl;
 	return 0;
 }

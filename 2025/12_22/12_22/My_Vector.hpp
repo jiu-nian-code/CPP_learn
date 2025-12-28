@@ -1,12 +1,7 @@
 #pragma once
-
-#define _CRT_SECURE_NO_WARNINGS 1
-
 #include<iostream>
-
 #include<vector>
-
-#include<assert.h>
+#include<cassert>
 
 namespace jiunian
 {
@@ -14,8 +9,8 @@ namespace jiunian
     class vector
     {
     public:
-        typedef T* iterator;
-        typedef const T* const_iterator;
+        using iterator = T*;
+        using const_iterator = const T*;
         iterator begin() { return _start; }
         iterator end() { return _finish; }
         const_iterator begin() const { return _start; }
@@ -44,11 +39,17 @@ namespace jiunian
                 ++first;
             }
         }
-        vector(const vector<T>& v)
+        vector(const vector<T>& v) noexcept
         {
+            std::cout << "vector(const vector<T>& v) --深拷贝" << std::endl;
             reserve(v.capacity());
             for (auto e : v)
                 push_back(e);
+        }
+        vector(vector<T>&& v) noexcept
+        {
+            std::cout << "vector(vector<T>&& v) --移动构造" << std::endl;
+            swap(v);
         }
         void swap(vector<T>& v)
         {
@@ -61,8 +62,16 @@ namespace jiunian
             assert(pos < size());
             return _start[pos];
         }
-        vector<T>& operator= (vector<T> v)
+        vector<T>& operator= (const vector<T>& v)
         {
+            std::cout << "vector<T>& operator= (vector<T> v) --深拷贝" << std::endl;
+            vector<T> tmp(v);
+            swap(tmp);
+            return *this;
+        }
+        vector<T>& operator= (vector<T>&& v)
+        {
+            std::cout << "vector<T>& operator= (vector<T>&& v) --移动拷贝" << std::endl;
             swap(v);
             return *this;
         }
