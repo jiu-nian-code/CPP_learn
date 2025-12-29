@@ -218,6 +218,23 @@ int main()
 	// 结果:
 	// void func(int&& a)
 	// void func(int& a)
+		//func(1);
+	//int a = 1;
+	//func(a);
+	// 结果:
+	// void func(int&& a)
+		//func(1);
+	//int a = 1;
+	//func(a);
+	// 结果:
+	// void func(int&& a)
+	// void func(int& a)	//func(1);
+	//int a = 1;
+	//func(a);
+	// 结果:
+	// void func(int&& a)
+	// void func(int& a)
+	// void func(int& a)
 
 	jiunian::vector<int> arr;
 	arr = func();
