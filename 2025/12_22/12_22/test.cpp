@@ -2,6 +2,7 @@
 #include<fstream>
 #include<string>
 #include<vector>
+#include<unordered_map>
 #include<queue>
 #include<unordered_map>
 #include<ctime>
@@ -152,18 +153,18 @@ using namespace std;
 //	std::cout << "void func(const int& a)" << std::endl;
 //}
 
-jiunian::vector<int> func()
-{
-	jiunian::vector<int> ret1{ 1, 2, 3 };
-	jiunian::vector<int> ret2{ 4, 5, 6 };
-	return (rand() % 2) ? ret1 : ret2; // 条件返回，通常禁用 RVO
-}
-
 //jiunian::vector<int> func()
 //{
-//	jiunian::vector<int> ret{ 1, 2, 3 };
-//	return move(ret);
+//	jiunian::vector<int> ret1{ 1, 2, 3 };
+//	jiunian::vector<int> ret2{ 4, 5, 6 };
+//	return (rand() % 2) ? ret1 : ret2; // 条件返回，通常禁用 RVO
 //}
+
+jiunian::vector<int>&& func()
+{
+	jiunian::vector<int> ret{ 1, 2, 3 };
+	return move(ret);
+}
 
 int main()
 {
@@ -218,29 +219,80 @@ int main()
 	// 结果:
 	// void func(int&& a)
 	// void func(int& a)
-		//func(1);
-	//int a = 1;
-	//func(a);
-	// 结果:
-	// void func(int&& a)
-		//func(1);
-	//int a = 1;
-	//func(a);
-	// 结果:
-	// void func(int&& a)
-	// void func(int& a)	//func(1);
-	//int a = 1;
-	//func(a);
-	// 结果:
-	// void func(int&& a)
-	// void func(int& a)
-	// void func(int& a)
 
-	jiunian::vector<int> arr;
-	arr = func();
+	//jiunian::vector<int> arr;
+	//arr = func();
 	//jiunian::vector<int> arr = func();
-	for (auto& e : arr)
-		std::cout << e << " ";
-	std::cout << std::endl;
+	//for (auto& e : arr)
+	//	std::cout << e << " ";
+	//std::cout << std::endl;
+
+	//jiunian::vector<int> arr1{ 1, 2, 3 };
+	//std::move(arr1);
+	//jiunian::vector<int> arr2 = arr1;
+	// 打印结果: vector(const vector<T>& v) --深拷贝
+	//jiunian::vector<int> arr1{ 1, 2, 3 };
+	//jiunian::vector<int> arr2 = std::move(arr1);
+	// 打印结果: vector(vector<T>&& v) --移动构造
+
+	//jiunian::vector<jiunian::vector<int>> arr;
+	//arr.reserve(10);
+	//arr.push_back({1, 2, 3});
+	//for (auto& e : arr)
+	//{
+	//	for (auto& n : e)
+	//		std::cout << n << " ";
+	//	std::cout << std::endl;
+	//}
+	//jiunian::vector<int> a{ 1, 2, 3 };
+	//arr.push_back(a);
+	//std::cout << "----------------------------------------" << std::endl;
+
+	//arr.push_back(std::move(a));
+	//std::cout << "----------------------------------------" << std::endl;
+
+	//arr.push_back({ 1, 2, 3 });
+
+	//std::vector<jiunian::vector<int>> arr(10);
+	//arr.reserve(10); // 提前扩容，不然触发扩容迁移数据影响观察结果
+	//jiunian::vector<int> a{ 1, 2, 3 };
+	//arr.push_back(a);
+	//std::cout << "----------------------------------------" << std::endl;
+
+	//arr.push_back(std::move(a));
+	//std::cout << "----------------------------------------" << std::endl;
+
+	//arr.push_back({ 1, 2, 3 });
+
+	// 打印结果: 
+	// vector(const vector<T>&v) --深拷贝
+	// ----------------------------------------
+	// vector(vector<T> && v) --移动构造
+	// ----------------------------------------
+	// vector(vector<T> && v) --移动构造
+
+	std::vector<jiunian::vector<int>> arr;
+	arr.reserve(10); // 提前扩容，不然触发扩容迁移数据影响观察结果
+	jiunian::vector<int> a{ 1, 2, 3 };
+	arr.insert(arr.begin(), a);
+	std::cout << "----------------------------------------" << std::endl;
+
+	arr.insert(arr.begin(), std::move(a));
+	std::cout << "----------------------------------------" << std::endl;
+
+	arr.insert(arr.begin(), jiunian::vector<int>{ 1, 2, 3 });
+	// insert正好有initializer_list版本的重载，这里不在前面声明jiunian::vector<int>会变成插入三个容量分别为1, 2, 3的jiunian::vector<int>
+
+	// 打印结果: 
+	// vector(const vector<T>& v) --深拷贝
+	// ----------------------------------------
+	// vector(vector<T> && v) --移动构造
+	// vector(vector<T> && v) --移动构造
+	// vector<T>&operator= (vector<T> && v) --移动拷贝
+	// ----------------------------------------
+	// vector(vector<T> && v) --移动构造
+	// vector(vector<T> && v) --移动构造
+	// vector<T>&operator= (vector<T> && v) --移动拷贝
+	// vector<T>&operator= (vector<T> && v) --移动拷贝
 	return 0;
 }

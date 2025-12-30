@@ -20,7 +20,7 @@ namespace jiunian
         size_t capacity() { return _end_of_storage - _start; }
         size_t capacity() const { return _end_of_storage - _start; }
         vector() {}
-        vector(int n, const T& value = T()) { resize(n, value); }
+        vector(int n, const T& value = T()) { resize(n, value); } // TODO?也许可以增加效率
         vector(std::initializer_list<T> il)
         {
             auto it = il.begin();
@@ -64,7 +64,7 @@ namespace jiunian
         }
         vector<T>& operator= (const vector<T>& v)
         {
-            std::cout << "vector<T>& operator= (vector<T> v) --深拷贝" << std::endl;
+            std::cout << "vector<T>& operator= (const vector<T>& v) --深拷贝" << std::endl;
             vector<T> tmp(v);
             swap(tmp);
             return *this;
@@ -93,7 +93,8 @@ namespace jiunian
             size_t old_size = size();
             if (old_size > 0)
             {
-                memcpy(tmp, _start, old_size * sizeof(T));
+                for (size_t i = 0; i < old_size; ++i)
+                    tmp[i] = std::move(_start[i]); // 如果 T 支持移动，这里会很高效
                 delete[] _start;
             }
             _start = tmp;
@@ -116,6 +117,26 @@ namespace jiunian
                 cur--;
             }
             *cur = value;
+            _finish++;
+            return pos;
+        }
+        iterator insert(iterator pos, T&& value)
+        {
+            size_t len = pos - _start;
+            if (len > size()) return iterator();
+            if (_finish == _end_of_storage)
+            {
+                reserve(capacity() + 1);
+                pos = _start + len;
+            }
+            iterator cur = _finish;
+            while (cur >= _start && cur != pos)
+            {
+                *(cur) = *(cur - 1);
+                cur--;
+            }
+            *cur = std::move(value);
+            // *cur = value;
             _finish++;
             return pos;
         }
@@ -143,6 +164,7 @@ namespace jiunian
             erase(pos);
         }
         void push_back(const T& value) { insert(end(), value); }
+        void push_back(T&& value) { insert(end(), std::move(value)); }
     private:
         iterator _start = nullptr;
         iterator _finish = nullptr;
