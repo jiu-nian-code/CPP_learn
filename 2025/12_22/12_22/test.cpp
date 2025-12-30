@@ -4,7 +4,6 @@
 #include<vector>
 #include<unordered_map>
 #include<queue>
-#include<unordered_map>
 #include<ctime>
 #include"my_vector.hpp"
 
@@ -235,15 +234,15 @@ int main()
 	//jiunian::vector<int> arr2 = std::move(arr1);
 	// 打印结果: vector(vector<T>&& v) --移动构造
 
-	//jiunian::vector<jiunian::vector<int>> arr;
-	//arr.reserve(10);
-	//arr.push_back({1, 2, 3});
-	//for (auto& e : arr)
-	//{
-	//	for (auto& n : e)
-	//		std::cout << n << " ";
-	//	std::cout << std::endl;
-	//}
+	jiunian::vector<jiunian::vector<int>> arr;
+	arr.reserve(10);
+	arr.push_back(jiunian::vector<int>{1, 2, 3});
+	for (auto& e : arr)
+	{
+		for (auto& n : e)
+			std::cout << n << " ";
+		std::cout << std::endl;
+	}
 	//jiunian::vector<int> a{ 1, 2, 3 };
 	//arr.push_back(a);
 	//std::cout << "----------------------------------------" << std::endl;
@@ -271,16 +270,16 @@ int main()
 	// ----------------------------------------
 	// vector(vector<T> && v) --移动构造
 
-	std::vector<jiunian::vector<int>> arr;
-	arr.reserve(10); // 提前扩容，不然触发扩容迁移数据影响观察结果
-	jiunian::vector<int> a{ 1, 2, 3 };
-	arr.insert(arr.begin(), a);
-	std::cout << "----------------------------------------" << std::endl;
+	//std::vector<jiunian::vector<int>> arr;
+	//arr.reserve(10); // 提前扩容，不然触发扩容迁移数据影响观察结果
+	//jiunian::vector<int> a{ 1, 2, 3 };
+	//arr.insert(arr.begin(), a);
+	//std::cout << "----------------------------------------" << std::endl;
 
-	arr.insert(arr.begin(), std::move(a));
-	std::cout << "----------------------------------------" << std::endl;
+	//arr.insert(arr.begin(), std::move(a));
+	//std::cout << "----------------------------------------" << std::endl;
 
-	arr.insert(arr.begin(), jiunian::vector<int>{ 1, 2, 3 });
+	//arr.insert(arr.begin(), jiunian::vector<int>{ 1, 2, 3 });
 	// insert正好有initializer_list版本的重载，这里不在前面声明jiunian::vector<int>会变成插入三个容量分别为1, 2, 3的jiunian::vector<int>
 
 	// 打印结果: 

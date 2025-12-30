@@ -135,8 +135,7 @@ namespace jiunian
                 *(cur) = *(cur - 1);
                 cur--;
             }
-            *cur = std::move(value);
-            // *cur = value;
+            *cur = std::forward<T>(value);
             _finish++;
             return pos;
         }
@@ -164,7 +163,7 @@ namespace jiunian
             erase(pos);
         }
         void push_back(const T& value) { insert(end(), value); }
-        void push_back(T&& value) { insert(end(), std::move(value)); }
+        void push_back(T&& value) { insert(end(), std::forward<T>(value)); }
     private:
         iterator _start = nullptr;
         iterator _finish = nullptr;

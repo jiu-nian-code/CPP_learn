@@ -1,12 +1,7 @@
 ﻿#pragma once
-
-#define _CRT_SECURE_NO_WARNINGS 1
-
 #include<iostream>
-
 #include<vector>
-
-#include<assert.h>
+#include<cassert>
 
 namespace jiunian
 {
@@ -14,8 +9,8 @@ namespace jiunian
     class vector
     {
     public:
-        typedef T* iterator;
-        typedef const T* const_iterator;
+        using iterator = T*;
+        using const_iterator = const T*;
         iterator begin() { return _start; }
         iterator end() { return _finish; }
         const_iterator begin() const { return _start; }
@@ -25,7 +20,7 @@ namespace jiunian
         size_t capacity() { return _end_of_storage - _start; }
         size_t capacity() const { return _end_of_storage - _start; }
         vector() {}
-        vector(int n, const T& value = T()) { resize(n, value); }
+        vector(int n, const T& value = T()) { resize(n, value); } // TODO?也许可以增加效率
         vector(std::initializer_list<T> il)
         {
             auto it = il.begin();
@@ -44,11 +39,17 @@ namespace jiunian
                 ++first;
             }
         }
-        vector(const vector<T>& v)
+        vector(const vector<T>& v) noexcept
         {
+            std::cout << "vector(const vector<T>& v) --深拷贝" << std::endl;
             reserve(v.capacity());
             for (auto e : v)
                 push_back(e);
+        }
+        vector(vector<T>&& v) noexcept
+        {
+            std::cout << "vector(vector<T>&& v) --移动构造" << std::endl;
+            swap(v);
         }
         void swap(vector<T>& v)
         {
@@ -61,8 +62,16 @@ namespace jiunian
             assert(pos < size());
             return _start[pos];
         }
-        vector<T>& operator= (vector<T> v)
+        vector<T>& operator= (const vector<T>& v)
         {
+            std::cout << "vector<T>& operator= (const vector<T>& v) --深拷贝" << std::endl;
+            vector<T> tmp(v);
+            swap(tmp);
+            return *this;
+        }
+        vector<T>& operator= (vector<T>&& v)
+        {
+            std::cout << "vector<T>& operator= (vector<T>&& v) --移动拷贝" << std::endl;
             swap(v);
             return *this;
         }
@@ -84,7 +93,8 @@ namespace jiunian
             size_t old_size = size();
             if (old_size > 0)
             {
-                memcpy(tmp, _start, old_size * sizeof(T));
+                for (size_t i = 0; i < old_size; ++i)
+                    tmp[i] = std::move(_start[i]); // 如果 T 支持移动，这里会很高效
                 delete[] _start;
             }
             _start = tmp;
@@ -110,9 +120,28 @@ namespace jiunian
             _finish++;
             return pos;
         }
+        iterator insert(iterator pos, T&& value)
+        {
+            size_t len = pos - _start;
+            if (len > size()) return iterator();
+            if (_finish == _end_of_storage)
+            {
+                reserve(capacity() + 1);
+                pos = _start + len;
+            }
+            iterator cur = _finish;
+            while (cur >= _start && cur != pos)
+            {
+                *(cur) = *(cur - 1);
+                cur--;
+            }
+            *cur = std::forward<T>(value);
+            _finish++;
+            return pos;
+        }
         iterator erase(iterator pos)
         {
-            if (pos > _finish) return;
+            if (pos > _finish) return iterator();
             size_t len = pos - _start;
             while (pos + 1 != _finish) *pos = *(pos + 1), pos++;
             _finish--;
@@ -134,6 +163,7 @@ namespace jiunian
             erase(pos);
         }
         void push_back(const T& value) { insert(end(), value); }
+        void push_back(T&& value) { insert(end(), std::forward<T>(value)); }
     private:
         iterator _start = nullptr;
         iterator _finish = nullptr;
