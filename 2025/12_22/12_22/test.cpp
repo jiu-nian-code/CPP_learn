@@ -159,15 +159,15 @@ using namespace std;
 //	return (rand() % 2) ? ret1 : ret2; // 条件返回，通常禁用 RVO
 //}
 
-jiunian::vector<int>&& func()
-{
-	jiunian::vector<int> ret{ 1, 2, 3 };
-	return move(ret);
-}
-
-int main()
-{
-	srand(time(NULL));
+//jiunian::vector<int>&& func()
+//{
+//	jiunian::vector<int> ret{ 1, 2, 3 };
+//	return move(ret);
+//}
+//
+//int main()
+//{
+//	srand(time(NULL));
 	//std::vector<char> arr{'a', 'b', 'c'};
 	//int a = 1;
 	//int& b = a;
@@ -234,15 +234,15 @@ int main()
 	//jiunian::vector<int> arr2 = std::move(arr1);
 	// 打印结果: vector(vector<T>&& v) --移动构造
 
-	jiunian::vector<jiunian::vector<int>> arr;
-	arr.reserve(10);
-	arr.push_back(jiunian::vector<int>{1, 2, 3});
-	for (auto& e : arr)
-	{
-		for (auto& n : e)
-			std::cout << n << " ";
-		std::cout << std::endl;
-	}
+	//jiunian::vector<jiunian::vector<int>> arr;
+	//arr.reserve(10);
+	//arr.push_back(jiunian::vector<int>{1, 2, 3});
+	//for (auto& e : arr)
+	//{
+	//	for (auto& n : e)
+	//		std::cout << n << " ";
+	//	std::cout << std::endl;
+	//}
 	//jiunian::vector<int> a{ 1, 2, 3 };
 	//arr.push_back(a);
 	//std::cout << "----------------------------------------" << std::endl;
@@ -293,5 +293,57 @@ int main()
 	// vector(vector<T> && v) --移动构造
 	// vector<T>&operator= (vector<T> && v) --移动拷贝
 	// vector<T>&operator= (vector<T> && v) --移动拷贝
+//	return 0;
+//}
+
+int main()
+{
+	//jiunian::vector<jiunian::vector<int>> arr;
+	//arr.reserve(10);
+	//std::cout << "emplace_back: " << std::endl;
+	//arr.emplace_back(jiunian::vector<int>{1, 2, 3});
+	//std::cout << "push_back: " << std::endl;
+	//arr.push_back(jiunian::vector<int>{1, 2, 3});
+	//std::cout << "----------------------------------------" << std::endl;
+	//std::cout << "emplace_back: " << std::endl;
+	//arr.emplace_back(10, 1);
+	//std::cout << "push_back: " << std::endl;
+	//arr.push_back(jiunian::vector<int>(10, 1));
+	//std::cout << "----------------------------------------" << std::endl;
+	//jiunian::vector<int> tmp{ 4, 5, 6 };
+	//std::cout << "emplace_back: " << std::endl;
+	//arr.emplace_back(tmp);
+	//std::cout << "push_back: " << std::endl;
+	//arr.push_back(tmp);
+	// 打印结果: 
+	// emplace_back:
+	// vector(vector<T> && v) --移动构造
+	// push_back :
+	// vector(vector<T> && v) --移动构造
+	// ----------------------------------------
+	// emplace_back :
+	// push_back :
+	// vector(vector<T> && v) --移动构造
+	// ----------------------------------------
+	// emplace_back :
+	// vector(const vector<T>&v) --深拷贝
+	// push_back :
+	// vector(const vector<T>&v) --深拷贝
+
+	//for (auto& e : arr)
+	//{
+	//	for (auto& n : e)
+	//		std::cout << n << " ";
+	//	std::cout << std::endl;
+	//}
+	// 打印结果: 
+	// vector(vector<T> && v) --移动构造
+	// vector(vector<T> && v) --移动构造
+	// vector(const vector<T>&v) --深拷贝
+	// vector(vector<T> && v) --移动构造
+	// vector(vector<T> && v) --移动构造
+	// 1 2 3
+	// 1 1 1 1 1 1 1 1 1 1
+	// 4 5 6
 	return 0;
 }
