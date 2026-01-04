@@ -1,6 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS 1
 #include<iostream>
 #include<memory>
 #include<exception>
+#include<functional>
 
 namespace jiunian
 {
@@ -42,14 +44,16 @@ namespace jiunian
 	{
 		T* _ptr;
 		size_t* _ref_count;
+		std::function<void(T* ptr)> _del = [](T* ptr) { delete ptr; };
 	public:
 		using Self = shared_ptr<T>;
 		shared_ptr() : _ptr(nullptr), _ref_count(new size_t(0)) {}
-		shared_ptr(T* ptr) : _ptr(ptr), _ref_count(new size_t(1)) {}
+		template<class T, class D>
+		shared_ptr(T* ptr, D d) : _ptr(ptr), _ref_count(new size_t(1)), _del(d) {}
 		~shared_ptr()
 		{
 			if (_ptr && --(*_ref_count) == 0)
-				delete _ptr, delete _ref_count;
+				_del(_ptr), delete _ref_count;
 		}
 		T& operator*() { return *_ptr; }
 		T* operator->() { return _ptr; }
@@ -60,7 +64,7 @@ namespace jiunian
 		{
 			if (sp._ptr == _ptr) return *this;
 			if (_ptr && --(*_ref_count) == 0)
-				delete _ptr, delete _ref_count;
+				_del(_ptr), delete _ref_count;
 			_ptr = sp._ptr;
 			_ref_count = sp._ref_count;
 			++(*_ref_count);
@@ -70,7 +74,7 @@ namespace jiunian
 		{
 			if (sp._ptr == _ptr) return *this;
 			if (_ptr && --(*_ref_count) == 0)
-				delete _ptr, delete _ref_count;
+				_del(_ptr), delete _ref_count;
 			_ptr = sp._ptr;
 			_ref_count = sp._ref_count;
 			sp._ptr = nullptr;
@@ -120,13 +124,13 @@ void div()
 	if (b == 0) throw std::invalid_argument("Division by zero error.");
 }
 
-void func()
-{
-	jiunian::auto_ptr<A> ptr1(new A());
-	jiunian::auto_ptr<A> ptr2(new A());
-	ptr1->_a++;
-	(*ptr1).PRINT();
-}
+//void func()
+//{
+//	jiunian::auto_ptr<A> ptr1(new A());
+//	jiunian::auto_ptr<A> ptr2(new A());
+//	ptr1->_a++;
+//	(*ptr1).PRINT();
+//}
 
 //int main()
 //{
@@ -162,6 +166,11 @@ public:
 	int _var;
 };
 
+void func(A* ptr)
+{
+	delete[] ptr;
+}
+
 int main()
 {
 	//jiunian::auto_ptr<A> ptr1(new A());
@@ -192,12 +201,27 @@ int main()
 	//std::cout << ptr3.get() << std::endl;
 	//std::cout << ptr1.use_count() << std::endl; // 打印引用计数
 
-	jiunian::shared_ptr<Node> no1(new Node());
-	jiunian::shared_ptr<Node> no2(new Node());
-	no1->_next = no2;
-	no2->_next = no1;
-	std::cout << no1.use_count() << std::endl;
-	std::cout << no2.use_count() << std::endl;
+	//jiunian::shared_ptr<Node> no1(new Node());
+	//jiunian::shared_ptr<Node> no2(new Node());
+	//no1->_next = no2;
+	//no2->_next = no1;
+	//std::cout << no1.use_count() << std::endl;
+	//std::cout << no2.use_count() << std::endl;
+
+	//std::shared_ptr<A> ptr1(new A[10]());
+	//std::shared_ptr<A> ptr2((A*)malloc(sizeof(A) * 10));
+	//std::shared_ptr<FILE> ptr3(fopen("test.cpp", "r"));
+
+	jiunian::shared_ptr<A> ptr1(new A[10](), [](A* ptr) { delete[] ptr; });
+	jiunian::shared_ptr<A> ptr2((A*)malloc(sizeof(A) * 10), [](A* ptr) { free(ptr); });
+	jiunian::shared_ptr<FILE> ptr3(fopen("test.cpp", "r"), [](FILE* ptr) { fclose(ptr); });
+
+	//auto del1 = [](A* ptr) { delete[] ptr; };
+	//std::unique_ptr<A, decltype(del1)> ptr1(new A[10](), del1);
+	//auto del2 = [](A* ptr) { free(ptr); };
+	//std::unique_ptr<A, decltype(del2)> ptr2((A*)malloc(sizeof(A) * 10), del2);
+	//auto del3 = [](FILE* ptr) { fclose(ptr); };
+	//std::unique_ptr<FILE, decltype(del3)> ptr3(fopen("test.cpp", "r"), del3);
 	return 0;
 }
 // 打印结果为:
