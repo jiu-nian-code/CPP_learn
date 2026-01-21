@@ -1,22 +1,38 @@
+#define _CRT_SECURE_NO_WARNINGS 1
 #include<iostream>
 #include<thread>
 #include<mutex>
-#include<windows.h>
+#include<chrono>
+#include<ctime>
+#include<vector>
 
 void PRINT(int num)
 {
-	for(int i = 0; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		std::cout << "thread " << std::this_thread::get_id() << ": " << i << std::endl;
-		Sleep(1000);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
 int main()
 {
-	std::thread th1(PRINT, 10);
-	std::thread th2(PRINT, 10);
+	//std::vector<std::thread> arr(20);
+	//for (auto& e : arr)
+	//	e = std::thread(PRINT, 10);
+	//for (auto& e : arr)
+	//	e.join();
+	std::thread th1;
+	{
+		std::thread th2(PRINT, 10);
+		th1 = std::move(th2);
+	}
+	std::unique_ptr<std::thread> th_ptr;
+	{
+		std::thread th2(PRINT, 10);
+		th_ptr = std::move(std::unique_ptr<std::thread>(new std::thread(std::move(th2))));
+	}
 	th1.join();
-	th2.join();
+	th_ptr->join();
 	return 0;
 }
