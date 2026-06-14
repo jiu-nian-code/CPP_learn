@@ -1,9 +1,7 @@
-#define _CRT_SECURE_NO_WARNINGS 1
-
 #include<iostream>
 
 int main()
 {
-	int a = 2;
+
 	return 0;
 }
