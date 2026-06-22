@@ -44,7 +44,7 @@ namespace jiunian
         {
             std::cout << "vector(const vector<T>& v) --深拷贝" << std::endl;
             reserve(v.capacity());
-            for (auto e : v)
+            for (auto& e : v)
                 push_back(e);
         }
         vector(vector<T>&& v) noexcept
@@ -79,10 +79,9 @@ namespace jiunian
         ~vector()
         {
             if (_start == nullptr) return;
+            for (iterator it = _start; it != _finish; ++it) it->~T();
             free(_start);
-            _start = nullptr;
-            _finish = nullptr;
-            _end_of_storage = nullptr;
+            _start = _finish = _end_of_storage = nullptr;
         }
         void reserve(size_t sz)
         {
@@ -91,12 +90,12 @@ namespace jiunian
             while (new_size < sz) new_size *= 2;
             //iterator tmp = new T[new_size]{};
             iterator tmp = (iterator)malloc(sizeof(T) * new_size);
-            if (!tmp) { printf("new error."); return; }
+            if (!tmp) { printf("new error.\n"); return; }
             size_t old_size = size();
             if (old_size > 0)
             {
-                for (size_t i = 0; i < old_size; ++i)
-                    tmp[i] = std::move(_start[i]); // 如果 T 支持移动，这里会很高效
+                for (size_t i = 0; i < old_size; ++i) new (&tmp[i]) T(std::move(_start[i]));
+                for (size_t i = 0; i < old_size; ++i) _start[i].~T();
                 free(_start);
             }
             _start = tmp;
@@ -112,13 +111,21 @@ namespace jiunian
                 reserve(capacity() + 1);
                 pos = _start + len;
             }
-            iterator cur = _finish;
-            while (cur >= _start && cur != pos)
+            if (_finish == pos)
             {
-                *(cur) = *(cur - 1);
-                cur--;
+                new (_finish) T(value);
             }
-            new (cur)T(value);
+            else
+            {
+                new (_finish) T(std::move(*(_finish - 1)));
+                iterator cur = _finish - 1;
+                while (cur > pos)
+                {
+                    *cur = std::move(*(cur - 1));
+                    cur--;
+                }
+                *pos = value;
+            }
             _finish++;
             return pos;
         }
@@ -131,13 +138,21 @@ namespace jiunian
                 reserve(capacity() + 1);
                 pos = _start + len;
             }
-            iterator cur = _finish;
-            while (cur >= _start && cur != pos)
+            if (_finish == pos)
             {
-                *(cur) = *(cur - 1);
-                cur--;
+                new (_finish) T(std::forward<T>(value));
             }
-            new (cur)T(std::forward<T>(value));
+            else
+            {
+                new (_finish) T(std::move(*(_finish - 1)));
+                iterator cur = _finish - 1;
+                while (cur > pos)
+                {
+                    *cur = std::move(*(cur - 1));
+                    cur--;
+                }
+                *pos = std::forward<T>(value);
+            }
             _finish++;
             return pos;
         }
@@ -151,32 +166,56 @@ namespace jiunian
                 reserve(capacity() + 1);
                 pos = _start + len;
             }
-            iterator cur = _finish;
-            while (cur >= _start && cur != pos)
+            if (_finish == pos)
             {
-                *(cur) = *(cur - 1);
-                cur--;
+                new (_finish) T(std::forward<Args>(args)...);
             }
-            new (cur)T(std::forward<Args>(args)...);
+            else
+            {
+                new (_finish) T(std::move(*(_finish - 1)));
+                iterator cur = _finish - 1;
+                while (cur > pos)
+                {
+                    *cur = std::move(*(cur - 1));
+                    cur--;
+                }
+                *pos = T(std::forward<Args>(args)...);
+            }
             _finish++;
             return pos;
         }
         iterator erase(iterator pos)
         {
-            if (pos > _finish) return;
+            if (pos >= _finish || pos < _start) return end();
             size_t len = pos - _start;
-            while (pos + 1 != _finish) *pos = *(pos + 1), pos++;
+            iterator cur = pos;
+            while (cur + 1 != _finish)
+            {
+                *cur = std::move(*(cur + 1));
+                cur++;
+            }
+            (_finish - 1)->~T();
             _finish--;
             return _start + len;
         }
         void resize(size_t sz, const T& value = T())
         {
-            if (sz < size()) { _finish = _start + sz; return; }
-            reserve(sz);
-            while (_finish != _start + sz)
+            if (sz < size())
             {
-                *_finish = value;
-                ++_finish;
+                while (_finish > _start + sz)
+                {
+                    (_finish - 1)->~T();
+                    _finish--;
+                }
+            }
+            else
+            {
+                reserve(sz);
+                while (_finish != _start + sz)
+                {
+                    new (_finish) T(value);
+                    ++_finish;
+                }
             }
         }
         void pop_back()

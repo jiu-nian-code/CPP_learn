@@ -89,7 +89,7 @@ namespace jiunian
             size_t new_size = capacity() == 0 ? 4 : capacity();
             while (new_size < sz) new_size *= 2;
             iterator tmp = new T[new_size]{};
-            if (!tmp) { printf("new error."); return; }
+            // if (!tmp) { printf("new error."); return; }
             size_t old_size = size();
             if (old_size > 0)
             {

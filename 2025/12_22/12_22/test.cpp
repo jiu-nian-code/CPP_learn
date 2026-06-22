@@ -296,8 +296,8 @@ using namespace std;
 //	return 0;
 //}
 
-int main()
-{
+//int main()
+//{
 	//jiunian::vector<jiunian::vector<int>> arr;
 	//arr.reserve(10);
 	//std::cout << "emplace_back: " << std::endl;
@@ -345,5 +345,40 @@ int main()
 	// 1 2 3
 	// 1 1 1 1 1 1 1 1 1 1
 	// 4 5 6
+//	return 0;
+//}
+
+jiunian::vector<int> func()
+{
+	jiunian::vector<int> ret1{ 1, 2, 3 };
+	jiunian::vector<int> ret2{ 4, 5, 6 };
+	return (rand() % 2) ? ret1 : ret2;
+}
+
+int main()
+{
+	jiunian::vector<jiunian::vector<int>> arr;
+	arr.reserve(10); // 提前扩容，不然触发扩容迁移数据影响观察结果
+	jiunian::vector<int> a{ 1, 2, 3 };
+	arr.insert(arr.begin(), a);
+	std::cout << "----------------------------------------" << std::endl;
+
+	arr.insert(arr.begin(), std::move(a));
+	std::cout << "----------------------------------------" << std::endl;
+
+	arr.insert(arr.begin(), jiunian::vector<int>{ 1, 2, 3 });
+	// insert正好有initializer_list版本的重载，这里不在前面声明jiunian::vector<int>会变成插入三个容量分别为1, 2, 3的jiunian::vector<int>
+
+	// 打印结果: 
+	// vector(const vector<T>& v) --深拷贝
+	// ----------------------------------------
+	// vector(vector<T> && v) --移动构造
+	// vector(vector<T> && v) --移动构造
+	// vector<T>&operator= (vector<T> && v) --移动拷贝
+	// ----------------------------------------
+	// vector(vector<T> && v) --移动构造
+	// vector(vector<T> && v) --移动构造
+	// vector<T>&operator= (vector<T> && v) --移动拷贝
+	// vector<T>&operator= (vector<T> && v) --移动拷贝
 	return 0;
 }
